@@ -1,0 +1,49 @@
+{
+    "name": "ROS 2 Workspace humble-ros-base", // Thx https://github.com/BrunoB81HK/ros2-workspace-devcontainer-template/tree/main/src/ros2-workspace
+    "remoteUser": "rosdev",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "USERNAME": "rosdev",
+            "GID": "1000",
+            "UID": "1000"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "charliermarsh.ruff",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-iot.vscode-ros",
+                "smilerobotics.urdf",
+                "redhat.vscode-xml",
+                "tamasfe.even-better-toml",
+                "timonwong.shellcheck",
+                "yzhang.markdown-all-in-one",
+            ],
+            "settings": {
+                "files.associations": {
+                    "*.rviz": "yaml",
+                    "*.srdf": "xml",
+                    "*.urdf": "xml",
+                    "*.xacro": "xml"
+                }
+            }
+        }
+    },
+    "workspaceFolder": "/home/rosdev/ros2_ws",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/rosdev/ros2_ws,type=bind",
+    "mounts": [
+    ],
+    "runArgs": [
+        "--net=host",
+        "-v", "/dev:/dev", // See: https://micro.ros.org/docs/tutorials/core/first_application_linux/
+        "--privileged", // Otherwise, ffmpeg will say "Operation not permitted"
+        "-v=/tmp/.X11-unix:/tmp/.X11-unix:rw", "--env=DISPLAY", // for Xauth // See: https://wiki.ros.org/docker/Tutorials/GUI
+        "--gpus=all", "-e", "NVIDIA_DRIVER_CAPABILITIES=all" // for GPU Rendering // See: https://blog.csdn.net/weixin_43357110/article/details/131934599
+    ],
+    "features": {
+        // "ghcr.io/rocker-org/devcontainer-features/miniforge:1": {}
+    }
+}
