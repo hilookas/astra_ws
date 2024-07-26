@@ -1,3 +1,6 @@
 [submodule "src/astra_description"]
 	path = src/astra_description
 	url = https://github.com/hilookas/astra_description
+[submodule "src/astra_moveit_config"]
+	path = src/astra_moveit_config
+	url = https://github.com/hilookas/astra_moveit_config
