@@ -1,0 +1,3 @@
+[submodule "src/astra_description"]
+	path = src/astra_description
+	url = https://github.com/hilookas/astra_description
