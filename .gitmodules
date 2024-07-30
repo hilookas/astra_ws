@@ -4,3 +4,9 @@
 [submodule "src/astra_moveit_config"]
 	path = src/astra_moveit_config
 	url = https://github.com/hilookas/astra_moveit_config
+[submodule "src/astra_controller"]
+	path = src/astra_controller
+	url = https://github.com/hilookas/astra_controller.git
+[submodule "src/astra_controller_interfaces"]
+	path = src/astra_controller_interfaces
+	url = https://github.com/hilookas/astra_controller_interface.git
