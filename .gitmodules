@@ -10,3 +10,18 @@
 [submodule "src/astra_controller_interfaces/"]
 	path = src/astra_controller_interfaces
 	url = https://github.com/hilookas/astra_controller_interfaces.git
+[submodule "non_ros_src/ModernRobotics"]
+	path = non_ros_src/ModernRobotics
+	url = https://github.com/NxRLab/ModernRobotics.git
+[submodule "non_ros_src/astra_teleop"]
+	path = non_ros_src/astra_teleop
+	url = https://github.com/hilookas/astra_teleop.git
+[submodule "non_ros_src/mr_urdf_loader"]
+	path = non_ros_src/mr_urdf_loader
+	url = https://github.com/hilookas/mr_urdf_loader.git
+[submodule "non_ros_src/pyribbit"]
+	path = non_ros_src/pyribbit
+	url = https://github.com/hilookas/pyribbit.git
+[submodule "non_ros_src/urchin"]
+	path = non_ros_src/urchin
+	url = https://github.com/hilookas/urchin.git

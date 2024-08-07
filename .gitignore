@@ -3,3 +3,4 @@ install
 log
 note.md
 .vscode
+venv
