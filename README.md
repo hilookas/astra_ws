@@ -4,8 +4,8 @@
 
 ```bash
 ros2 launch astra_description display_publish_model_only.launch
-source non_ros_src/venv/bin/activate
 cd src/astra_controller/astra_controller
-python main_teleop.py
-python main.py
+python teleop_node.py
+python ik_node.py
+python dry_run_node.py
 ```
