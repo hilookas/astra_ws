@@ -7,7 +7,7 @@
 [submodule "src/astra_controller"]
 	path = src/astra_controller
 	url = https://github.com/hilookas/astra_controller.git
-[submodule "src/astra_controller_interfaces/"]
+[submodule "src/astra_controller_interfaces"]
 	path = src/astra_controller_interfaces
 	url = https://github.com/hilookas/astra_controller_interfaces.git
 [submodule "non_ros_src/ModernRobotics"]
