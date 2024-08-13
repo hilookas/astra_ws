@@ -25,3 +25,6 @@
 [submodule "non_ros_src/urchin"]
 	path = non_ros_src/urchin
 	url = https://github.com/hilookas/urchin.git
+[submodule "non_ros_src/odrive-can"]
+	path = non_ros_src/odrive-can
+	url = https://github.com/hilookas/odrive-can
