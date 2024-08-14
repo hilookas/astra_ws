@@ -1,0 +1,18 @@
+# For Astra port binding
+# Run command on the host not in container!
+# 
+# ffplay -f v4l2 -input_format mjpeg -framerate 30 -video_size 1920x1080 /dev/video0
+# udevadm info --name=/dev/video0 --attribute-walk | grep KERNELS
+# ls /dev/ttyUSB*
+
+# sudo cp 99-astra-fixed-port.rules /etc/udev/rules.d/
+# sudo udevadm control --reload && sudo udevadm trigger
+
+SUBSYSTEM=="tty", KERNELS=="3-1.2.1:1.0", ENV{ID_MM_DEVICE_IGNORE}="1", ATTR{device/latency_timer}="1", MODE:="0666", SYMLINK+="tty_puppet_lift_left"
+SUBSYSTEM=="tty", KERNELS=="3-1.2.2:1.0", ENV{ID_MM_DEVICE_IGNORE}="1", ATTR{device/latency_timer}="1", MODE:="0666", SYMLINK+="tty_puppet_left"
+SUBSYSTEM=="tty", KERNELS=="3-1.1.1:1.0", ENV{ID_MM_DEVICE_IGNORE}="1", ATTR{device/latency_timer}="1", MODE:="0666", SYMLINK+="tty_puppet_lift_right"
+SUBSYSTEM=="tty", KERNELS=="3-1.1.2:1.0", ENV{ID_MM_DEVICE_IGNORE}="1", ATTR{device/latency_timer}="1", MODE:="0666", SYMLINK+="tty_puppet_right"
+SUBSYSTEM=="tty", KERNELS=="3-1.2.4:1.0", ENV{ID_MM_DEVICE_IGNORE}="1", ATTR{device/latency_timer}="1", MODE:="0666", SYMLINK+="tty_head"
+SUBSYSTEM=="video4linux", KERNELS=="3-1.1.4:1.0", ATTR{index}=="0", ATTR{device/latency_timer}="1", MODE:="0666", SYMLINK+="video_head"
+SUBSYSTEM=="video4linux", KERNELS=="3-1.2.3:1.0", ATTR{index}=="0", ATTR{device/latency_timer}="1", MODE:="0666", SYMLINK+="video_wrist_left"
+SUBSYSTEM=="video4linux", KERNELS=="3-1.1.3:1.0", ATTR{index}=="0", ATTR{device/latency_timer}="1", MODE:="0666", SYMLINK+="video_wrist_right"
