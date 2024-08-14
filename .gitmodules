@@ -27,4 +27,13 @@
 	url = https://github.com/hilookas/urchin.git
 [submodule "non_ros_src/odrive-can"]
 	path = non_ros_src/odrive-can
-	url = https://github.com/hilookas/odrive-can
+	url = https://github.com/hilookas/odrive-can.git
+[submodule "non_ros_src/aiortc"]
+	path = non_ros_src/aiortc
+	url = https://github.com/hilookas/aiortc.git
+[submodule "non_ros_src/astra_teleop_web"]
+	path = non_ros_src/astra_teleop_web
+	url = https://github.com/hilookas/astra_teleop_web.git
+[submodule "non_ros_src/lerobot"]
+	path = non_ros_src/lerobot
+	url = https://github.com/hilookas/lerobot.git
