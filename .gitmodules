@@ -37,3 +37,6 @@
 [submodule "non_ros_src/lerobot"]
 	path = non_ros_src/lerobot
 	url = https://github.com/hilookas/lerobot.git
+[submodule "src/usb_cam"]
+	path = src/usb_cam
+	url = https://github.com/hilookas/usb_cam
