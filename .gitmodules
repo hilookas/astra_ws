@@ -40,3 +40,9 @@
 [submodule "src/usb_cam"]
 	path = src/usb_cam
 	url = https://github.com/hilookas/usb_cam
+[submodule "non_ros_src/PyAV"]
+	path = non_ros_src/PyAV
+	url = https://github.com/hilookas/PyAV.git
+[submodule "src/simple_cap"]
+	path = src/simple_cap
+	url = https://github.com/hilookas/simple_cap
