@@ -41,7 +41,7 @@
         "-v", "/dev:/dev", // See: https://micro.ros.org/docs/tutorials/core/first_application_linux/
         "--privileged", // Otherwise, ffmpeg will say "Operation not permitted"
         "-v=/tmp/.X11-unix:/tmp/.X11-unix:rw", "--env=DISPLAY", // for Xauth // See: https://wiki.ros.org/docker/Tutorials/GUI
-        "--gpus=all", "-e", "NVIDIA_DRIVER_CAPABILITIES=all" // for GPU Rendering // See: https://blog.csdn.net/weixin_43357110/article/details/131934599
+        // "--gpus=all", "-e", "NVIDIA_DRIVER_CAPABILITIES=all" // for GPU Rendering // See: https://blog.csdn.net/weixin_43357110/article/details/131934599
     ],
     "features": {
         // "ghcr.io/rocker-org/devcontainer-features/miniforge:1": {}
