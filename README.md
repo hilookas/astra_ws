@@ -10,7 +10,7 @@
   <a href="https://www.notion.so/1b433900bc8780c4a503e3490ce3e718?pvs=21" target="_blank">Documentation</a> • 
   <a href="https://github.com/hilookas/astra_ws" target="_blank">ROS Code</a> •
   <a href="https://github.com/hilookas/AstraFirmwares" target="_blank">Firmware Code</a> •
-  <a href="https://github.com/hilookas/Astra_Hardwares" target="_blank">Hardware Code</a> •
+  <a href="https://github.com/hilookas/Astra_Hardwares" target="_blank">Hardware Design</a> •
   <a href="https://huggingface.co/lookas" target="_blank">Dataset</a>
 </div>
 
@@ -19,31 +19,29 @@
 This repository is the ROS2 workspace for AhaRobot, organized into the following structure:
 
 ### ROS2 Packages (`src/`)
+
+- **astra_controller**: The main part of the ROS workspace. This code communicates with the Firmware, routes ROS messages, performs inverse kinematics, and launches Web-based teleoperation
 - **astra_description**: Robot URDF models and visualization configurations
-- **astra_controller**: Implementation of robot control algorithms and nodes
-- **astra_controller_interfaces**: ROS2 interfaces for the Astra robot control
-- **astra_moveit_config**: MoveIt configuration for motion planning
-- **usb_cam**: USB camera driver and utilities
+- **astra_controller_interfaces**: Custom ROS message definitions
+- **astra_moveit_config**: MoveIt configuration for motion planning (deprecated)
+- **usb_cam**: Fork of `usb_cam`
 
 ### Non-ROS Components (`non_ros_src/`)
-- **astra_teleop**: RoboPilot teleoperation client software
-- **astra_teleop_web**: RoboPilot web-based teleoperation interface
-- **urchin**: Custom libraries for robot control
-- **ModernRobotics**: Robotics algorithms and utilities
-- **lerobot**: Supplementary learning libraries
-- **odrive-can**: ODrive motor controller interface
-- **pyribbit**: Python utilities for the robot
-- **mr_urdf_loader**: Modern Robotics URDF loading utilities
+
+- **astra_teleop**: Core of RoboPilot teleoperation, including Python version of marker detection and Perspective-n-Point (PnP) pose computation
+- **astra_teleop_web**: RoboPilot web-based teleoperation interface, WebAssembly version of marker detection
+- **ModernRobotics**: IK solver
+- **mr_urdf_loader**: Loading URDFs
+- **lerobot**: Learning-based algorithms 
+- **odrive-can**: ODrive CAN protocol library
+- **urchin**: Fork of `urdfpy`
+- **pyribbit**: Fork of `pyrender`
 
 ## How-to-use
 
-For detailed documentation, please refer to the following resources:
+For detailed documentation, please refer to our notion site:
 
-- [Install ROS 2 Workspace](docs/tutorials.md)
-  - Starting Your Docker
-  - Installing Dependence
-  - Visualizing Your Robot
-
+<https://www.notion.so/aha-robot/Install-ROS-2-Workspace-1d733900bc8780ffa416e26b2d88f018>
 
 ## License
 
