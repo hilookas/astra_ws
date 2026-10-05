@@ -5,7 +5,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 from nav2_common.launch import RewrittenYaml
 
@@ -21,6 +21,9 @@ def generate_launch_description():
     rviz_config = nav2_share / "rviz" / "nav2_default_view.rviz"
 
     start_rviz = LaunchConfiguration("start_rviz")
+    localization = LaunchConfiguration("localization")
+    ground_truth = IfCondition(PythonExpression(["'", localization, "' == 'ground_truth'"]))
+    amcl = IfCondition(PythonExpression(["'", localization, "' == 'amcl'"]))
     tuned_params = RewrittenYaml(
         source_file=str(params),
         param_rewrites={
@@ -29,6 +32,21 @@ def generate_launch_description():
             "required_movement_radius": "0.05",
             "movement_time_allowance": "20.0",
             "xy_goal_tolerance": "0.15",
+            # Simulation odometry is already close to the Gazebo pose. Keep
+            # particles tight enough to correct slip without jumping between
+            # similar-looking walls in the small test room.
+            "alpha1": "0.05",
+            "alpha2": "0.05",
+            "alpha3": "0.05",
+            "alpha4": "0.05",
+            "alpha5": "0.05",
+            # Keep map -> odom fresh even while the simulated robot is idle.
+            # Otherwise a goal sent after a long pause sees an expired AMCL TF.
+            "update_min_d": "0.0",
+            "update_min_a": "0.0",
+            "min_particles": "300",
+            "max_particles": "1200",
+            "set_initial_pose": "true",
         },
         convert_types=True,
     )
@@ -38,9 +56,12 @@ def generate_launch_description():
   <joint name='base_joint' type='fixed'><parent link='base_footprint'/><child link='base_link'/><origin xyz='0 0 0.18'/></joint>
   <joint name='laser_joint' type='fixed'><parent link='base_footprint'/><child link='laser_frame'/><origin xyz='0.20 0 0.43'/></joint>
 </robot>"""
-
     return LaunchDescription([
         DeclareLaunchArgument("start_rviz", default_value="true"),
+        DeclareLaunchArgument(
+            "localization", default_value="ground_truth",
+            description="ground_truth for deterministic tests, or amcl for LiDAR localization",
+        ),
         SetEnvironmentVariable("IGN_GAZEBO_RESOURCE_PATH", str(model_path)),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(ros_gz_share / "launch" / "gz_sim.launch.py")),
@@ -64,6 +85,7 @@ def generate_launch_description():
             package="tf2_ros", executable="static_transform_publisher",
             arguments=["0", "0", "0", "0", "0", "0", "map", "odom"],
             parameters=[{"use_sim_time": True}],
+            condition=ground_truth,
         ),
         Node(
             package="nav2_map_server", executable="map_server", name="map_server",
@@ -73,6 +95,30 @@ def generate_launch_description():
             package="nav2_lifecycle_manager", executable="lifecycle_manager",
             name="lifecycle_manager_localization", output="screen",
             parameters=[{"use_sim_time": True, "autostart": True, "node_names": ["map_server"]}],
+            condition=ground_truth,
+        ),
+        Node(
+            package="nav2_amcl", executable="amcl", name="amcl", output="screen",
+            parameters=[
+                tuned_params,
+                {
+                    "use_sim_time": True,
+                    "set_initial_pose": True,
+                    "initial_pose.x": 0.0,
+                    "initial_pose.y": 0.0,
+                    "initial_pose.yaw": 0.0,
+                },
+            ],
+            condition=amcl,
+        ),
+        Node(
+            package="nav2_lifecycle_manager", executable="lifecycle_manager",
+            name="lifecycle_manager_amcl", output="screen",
+            parameters=[{
+                "use_sim_time": True, "autostart": True,
+                "node_names": ["map_server", "amcl"],
+            }],
+            condition=amcl,
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(nav2_share / "launch" / "navigation_launch.py")),

@@ -30,6 +30,9 @@ cd /home/shun.kodaira/aharobot_sim
 
 # Start the navigation test world, map server, Nav2, and RViz.
 ./scripts/aharobot-sim nav2
+
+# Start the same stack with LiDAR-based AMCL localization.
+./scripts/aharobot-sim nav2-amcl
 ```
 
 Only one GUI mode is intended to run at a time. Starting either command stops
@@ -39,9 +42,9 @@ the previous RViz or Gazebo process in the dedicated container.
 
 The navigation launch uses a lightweight differential-drive AhaRobot base with
 a 2D LiDAR. The upstream hardware URDF is not changed. The test world has a
-matching occupancy map and uses Gazebo odometry as ground-truth localization,
-which keeps planner and controller tests deterministic while AMCL tuning is
-kept as a separate task.
+matching occupancy map. `nav2` uses Gazebo odometry as deterministic
+ground-truth localization; `nav2-amcl` estimates `map -> odom` from the LiDAR
+scan and publishes the known initial pose automatically.
 
 After `./scripts/aharobot-sim nav2`, set a goal using RViz's **Nav2 Goal** tool,
 or send one from SSH:
