@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+IMAGE_NAME="local/aharobot-sim:humble"
+CONTAINER_NAME="aharobot-sim"
+ACCOUNT_HOME="$(getent passwd "$(id -u)" | cut -d: -f6)"
+DISPLAY_VALUE="${DISPLAY:-:11.0}"
+XAUTH_PATH="${XAUTHORITY:-${ACCOUNT_HOME}/.Xauthority}"
+
+ensure_image() {
+  if ! docker image inspect "${IMAGE_NAME}" >/dev/null 2>&1; then
+    echo "Image ${IMAGE_NAME} is missing. Run: $0 build" >&2
+    exit 1
+  fi
+}
+
+ensure_container() {
+  ensure_image
+  if docker container inspect "${CONTAINER_NAME}" >/dev/null 2>&1; then
+    if [[ "$(docker inspect -f '{{.State.Running}}' "${CONTAINER_NAME}")" != "true" ]]; then
+      docker start "${CONTAINER_NAME}" >/dev/null
+    fi
+    return
+  fi
+
+  if [[ ! -r "${XAUTH_PATH}" ]]; then
+    echo "Xauthority file is not readable: ${XAUTH_PATH}" >&2
+    exit 1
+  fi
+
+  docker run -d \
+    --name "${CONTAINER_NAME}" \
+    --network host \
+    --ipc host \
+    --shm-size 2g \
+    -e "DISPLAY=${DISPLAY_VALUE}" \
+    -e XAUTHORITY=/tmp/.Xauthority \
+    -e QT_X11_NO_MITSHM=1 \
+    -e LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE:-1}" \
+    -v "${REPO_DIR}:/workspace" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    -v "${XAUTH_PATH}:/tmp/.Xauthority:ro" \
+    "${IMAGE_NAME}" sleep infinity >/dev/null
+}
+
+launch_gui() {
+  local launch_file="$1"
+  local log_file="/tmp/aharobot-${launch_file%.launch.py}.log"
+  ensure_container
+  docker exec "${CONTAINER_NAME}" bash -lc \
+    "pkill -TERM -f '[r]os2 launch aharobot_sim_bringup' 2>/dev/null || true; \
+     sleep 1; \
+     pkill -KILL -f '[/]opt/ros/humble/lib/rviz2/rviz2' 2>/dev/null || true; \
+     pkill -KILL -f '[j]oint_state_publisher_gui' 2>/dev/null || true; \
+     pkill -KILL -f '[r]obot_state_publisher' 2>/dev/null || true; \
+     pkill -KILL -f '[i]gn gazebo' 2>/dev/null || true"
+  docker exec -d "${CONTAINER_NAME}" bash -lc \
+    "source /opt/ros/humble/setup.bash && source /workspace/install/setup.bash && ros2 launch aharobot_sim_bringup ${launch_file} >${log_file} 2>&1"
+  echo "Started ${launch_file} on DISPLAY=${DISPLAY_VALUE}. Log: ${log_file}"
+}
+
+case "${1:-}" in
+  build)
+    docker build \
+      --build-arg "UID=$(id -u)" \
+      --build-arg "GID=$(id -g)" \
+      -t "${IMAGE_NAME}" \
+      -f "${REPO_DIR}/docker/sim/Dockerfile" \
+      "${REPO_DIR}"
+    ;;
+  up)
+    ensure_container
+    docker ps --filter "name=^/${CONTAINER_NAME}$"
+    ;;
+  bootstrap)
+    ensure_container
+    docker exec "${CONTAINER_NAME}" bash -lc \
+      "source /opt/ros/humble/setup.bash && cd /workspace && colcon build --symlink-install --packages-select astra_description aharobot_sim_bringup"
+    ;;
+  check)
+    ensure_container
+    docker exec "${CONTAINER_NAME}" bash -lc \
+      "source /opt/ros/humble/setup.bash && source /workspace/install/setup.bash && check_urdf /workspace/src/astra_description/urdf/astra_description.urdf"
+    ;;
+  rviz)
+    launch_gui rviz.launch.py
+    ;;
+  gazebo)
+    launch_gui gazebo.launch.py
+    ;;
+  logs)
+    ensure_container
+    docker exec "${CONTAINER_NAME}" bash -lc \
+      "tail -n 200 /tmp/aharobot-rviz.log /tmp/aharobot-gazebo.log 2>/dev/null || true"
+    ;;
+  status)
+    docker ps -a --filter "name=^/${CONTAINER_NAME}$"
+    ;;
+  stop)
+    if docker container inspect "${CONTAINER_NAME}" >/dev/null 2>&1; then
+      docker stop "${CONTAINER_NAME}" >/dev/null
+      echo "Stopped ${CONTAINER_NAME}"
+    fi
+    ;;
+  shell)
+    ensure_container
+    docker exec -it "${CONTAINER_NAME}" bash
+    ;;
+  *)
+    echo "Usage: $0 {build|up|bootstrap|check|rviz|gazebo|logs|status|stop|shell}" >&2
+    exit 2
+    ;;
+esac
