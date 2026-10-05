@@ -48,16 +48,18 @@ launch_gui() {
   local launch_file="$1"
   local log_file="/tmp/aharobot-${launch_file%.launch.py}.log"
   ensure_container
-  docker exec "${CONTAINER_NAME}" bash -lc \
-    "pkill -TERM -f '[r]os2 launch aharobot_sim_bringup' 2>/dev/null || true; \
-     sleep 1; \
-     pkill -KILL -f '[/]opt/ros/humble/lib/rviz2/rviz2' 2>/dev/null || true; \
-     pkill -KILL -f '[j]oint_state_publisher_gui' 2>/dev/null || true; \
-     pkill -KILL -f '[r]obot_state_publisher' 2>/dev/null || true; \
-     pkill -KILL -f '[i]gn gazebo' 2>/dev/null || true"
+  # This container is dedicated to the simulator. Restarting it guarantees
+  # that launch children adopted by PID 1 cannot leak between GUI modes.
+  docker restart "${CONTAINER_NAME}" >/dev/null
   docker exec -d "${CONTAINER_NAME}" bash -lc \
     "source /opt/ros/humble/setup.bash && source /workspace/install/setup.bash && ros2 launch aharobot_sim_bringup ${launch_file} >${log_file} 2>&1"
   echo "Started ${launch_file} on DISPLAY=${DISPLAY_VALUE}. Log: ${log_file}"
+}
+
+run_in_container() {
+  ensure_container
+  docker exec "${CONTAINER_NAME}" bash -lc \
+    "source /opt/ros/humble/setup.bash && source /workspace/install/setup.bash && $*"
 }
 
 case "${1:-}" in
@@ -89,10 +91,22 @@ case "${1:-}" in
   gazebo)
     launch_gui gazebo.launch.py
     ;;
+  nav2)
+    launch_gui nav2.launch.py
+    ;;
+  nav-goal)
+    GOAL_X="${2:-2.0}"
+    GOAL_Y="${3:-0.0}"
+    if [[ ! "${GOAL_X}" =~ ^-?[0-9]+([.][0-9]+)?$ || ! "${GOAL_Y}" =~ ^-?[0-9]+([.][0-9]+)?$ ]]; then
+      echo "nav-goal coordinates must be numbers: $0 nav-goal [x] [y]" >&2
+      exit 2
+    fi
+    run_in_container "ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose '{pose: {header: {frame_id: map}, pose: {position: {x: ${GOAL_X}, y: ${GOAL_Y}, z: 0.0}, orientation: {w: 1.0}}}}'"
+    ;;
   logs)
     ensure_container
     docker exec "${CONTAINER_NAME}" bash -lc \
-      "tail -n 200 /tmp/aharobot-rviz.log /tmp/aharobot-gazebo.log 2>/dev/null || true"
+      "tail -n 200 /tmp/aharobot-rviz.log /tmp/aharobot-gazebo.log /tmp/aharobot-nav2.log 2>/dev/null || true"
     ;;
   status)
     docker ps -a --filter "name=^/${CONTAINER_NAME}$"
@@ -108,7 +122,7 @@ case "${1:-}" in
     docker exec -it "${CONTAINER_NAME}" bash
     ;;
   *)
-    echo "Usage: $0 {build|up|bootstrap|check|rviz|gazebo|logs|status|stop|shell}" >&2
+    echo "Usage: $0 {build|up|bootstrap|check|rviz|gazebo|nav2|nav-goal [x] [y]|logs|status|stop|shell}" >&2
     exit 2
     ;;
 esac

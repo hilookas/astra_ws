@@ -3,14 +3,17 @@
   <name>aharobot_sim_bringup</name>
   <version>0.1.0</version>
   <description>DGX-friendly RViz and Gazebo bringup for AhaRobot.</description>
-  <maintainer email="junxiaoping5@icloud.com">ShunKodaira</maintainer>
+  <maintainer email="junxiaoping5@gmail.com">ShunKodaira</maintainer>
   <license>GPL-3.0-only</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>astra_description</exec_depend>
   <exec_depend>joint_state_publisher_gui</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_msgs</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>
   <exec_depend>rviz2</exec_depend>
 

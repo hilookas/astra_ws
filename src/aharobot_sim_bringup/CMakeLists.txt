@@ -3,7 +3,7 @@ project(aharobot_sim_bringup)
 
 find_package(ament_cmake REQUIRED)
 
-install(DIRECTORY launch rviz
+install(DIRECTORY launch maps models rviz worlds
   DESTINATION share/${PROJECT_NAME}
 )
 

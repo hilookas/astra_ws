@@ -14,7 +14,10 @@ RUN apt-get update \
         python3-colcon-common-extensions \
         ros-humble-desktop \
         ros-humble-joint-state-publisher-gui \
+        ros-humble-navigation2 \
+        ros-humble-nav2-bringup \
         ros-humble-ros-gz \
+        ros-humble-slam-toolbox \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --gid "${GID}" "${USERNAME}" \

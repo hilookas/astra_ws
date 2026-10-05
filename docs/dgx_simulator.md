@@ -27,10 +27,35 @@ cd /home/shun.kodaira/aharobot_sim
 
 # Spawn AhaRobot in Gazebo Fortress.
 ./scripts/aharobot-sim gazebo
+
+# Start the navigation test world, map server, Nav2, and RViz.
+./scripts/aharobot-sim nav2
 ```
 
 Only one GUI mode is intended to run at a time. Starting either command stops
 the previous RViz or Gazebo process in the dedicated container.
+
+## Nav2 navigation test
+
+The navigation launch uses a lightweight differential-drive AhaRobot base with
+a 2D LiDAR. The upstream hardware URDF is not changed. The test world has a
+matching occupancy map and uses Gazebo odometry as ground-truth localization,
+which keeps planner and controller tests deterministic while AMCL tuning is
+kept as a separate task.
+
+After `./scripts/aharobot-sim nav2`, set a goal using RViz's **Nav2 Goal** tool,
+or send one from SSH:
+
+```bash
+# Default goal: x=2.0, y=0.0 in the map frame.
+./scripts/aharobot-sim nav-goal
+
+# Custom map-frame goal.
+./scripts/aharobot-sim nav-goal 1.5 -0.5
+```
+
+The robot starts at `(0, 0)`. Keep goals inside the inner walls at
+approximately `-3.5 < x,y < 3.5`.
 
 ## Diagnostics and shutdown
 
@@ -44,8 +69,12 @@ the previous RViz or Gazebo process in the dedicated container.
 
 - RViz loads the complete upstream AhaRobot URDF and provides joint sliders.
 - Gazebo Fortress spawns the robot and ground plane with physics enabled.
+- The Nav2 mode bridges `/clock`, `/cmd_vel`, `/odom`, `/tf`, and `/scan`, and
+  starts the map server, planner, DWB controller, behavior tree navigator,
+  recovery behaviors, velocity smoother, and RViz.
 - The simulation copy removes two zero-size end-effector collision placeholders
   that make the DART physics engine abort. The upstream hardware URDF is not
   modified.
-- Joint controllers, mobile-base drive, simulated cameras, and ROS 2 navigation
-  are not connected yet. Those are the next implementation stage.
+- Arm joint controllers and simulated cameras are not connected yet. Navigation
+  uses the dedicated base model; integrating the full arm collision model and
+  AMCL localization are separate follow-up stages.

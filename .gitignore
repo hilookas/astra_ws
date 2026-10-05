@@ -7,3 +7,5 @@ venv
 cert.pem
 key.pem
 *.whl
+__pycache__/
+*.py[cod]
